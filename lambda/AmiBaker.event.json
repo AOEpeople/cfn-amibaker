@@ -1,0 +1,14 @@
+{
+    "StackId": "arn:aws:cloudformation:us-west-2:EXAMPLE/stack-name/guid",
+    "ResponseURL": "http://pre-signed-S3-url-for-response",
+    "ResourceProperties": {
+        "StackName": "TestStackName",
+        "Region": "eu-west-1",
+        "InstanceId": "i-xxxxxxx",
+        "AmiName": "foo"
+    },
+    "RequestType": "Create",
+    "ResourceType": "Custom::AmiBaker",
+    "RequestId": "unique id for this create request",
+    "LogicalResourceId": "MyTestResource"
+}

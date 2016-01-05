@@ -1,0 +1,4 @@
+stacks:
+  - stackname: amibaker-stack
+    template: amibaker.template
+    Capabilities: CAPABILITY_IAM
