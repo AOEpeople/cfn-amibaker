@@ -1,4 +1,12 @@
 stacks:
+
+  # Lambda function
   - stackname: amibaker-stack
     template: amibaker.template
     Capabilities: CAPABILITY_IAM
+
+  # Example
+  - stackname: example-stack
+    template: example/bake.template
+    parameters:
+      AmiBaker: '{output:amibaker-stack:AmiBakerArn}'
