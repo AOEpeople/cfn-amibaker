@@ -12,20 +12,22 @@
 
   "Resources": {
 
-    "ReadyForBakingHandle": { "Type": "AWS::CloudFormation::WaitConditionHandle" },
-    "ReadyForBakingCondition": {
-      "Type": "AWS::CloudFormation::WaitCondition",
+    "BaseAmiInstance": {
+      "Type": "AWS::EC2::Instance",
       "Properties": {
-        "Handle": {"Ref": "ReadyForBakingHandle"},
-        "Timeout": "600"
+        "ImageId": "ami-47a23a30",
+        "InstanceType": "t2.medium",
+        "InstanceInitiatedShutdownBehavior": "terminate",
+        "UserData": {"Fn::Base64": {"Fn::FileContent": "userdata/baseami.sh"}}
       }
     },
 
-    "BakingCompleteHandle": { "Type": "AWS::CloudFormation::WaitConditionHandle" },
-    "BakingCompleteCondition": {
+    "ReadyForBakingHandle": { "Type": "AWS::CloudFormation::WaitConditionHandle" },
+    "ReadyForBakingCondition": {
+      "DependsOn": "BaseAmiInstance",
       "Type": "AWS::CloudFormation::WaitCondition",
       "Properties": {
-        "Handle": {"Ref": "BakingCompleteHandle"},
+        "Handle": {"Ref": "ReadyForBakingHandle"},
         "Timeout": "600"
       }
     },
@@ -42,15 +44,16 @@
       }
     },
 
-    "BaseAmiInstance": {
-      "Type": "AWS::EC2::Instance",
+    "BakingCompleteHandle": { "Type": "AWS::CloudFormation::WaitConditionHandle" },
+    "BakingCompleteCondition": {
+      "DependsOn": "BakeAmi",
+      "Type": "AWS::CloudFormation::WaitCondition",
       "Properties": {
-        "ImageId": "ami-47a23a30",
-        "InstanceType": "t2.medium",
-        "InstanceInitiatedShutdownBehavior": "terminate",
-        "UserData": {"Fn::Base64": {"Fn::FileContent": "userdata/baseami.sh"}}
+        "Handle": {"Ref": "BakingCompleteHandle"},
+        "Timeout": "600"
       }
     }
+
   },
 
   "Outputs": {
