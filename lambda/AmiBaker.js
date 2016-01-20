@@ -7,10 +7,10 @@
 
 var r = require('cfn-response');
 
-exports.handler = function (event, context) {
+exports.handler = function (e, ctx) {
 
-    // console.log("REQUEST RECEIVED:\n", JSON.stringify(event));
-    var p = event.ResourceProperties,
+    console.log("REQUEST RECEIVED:\n", JSON.stringify(e));
+    var p = e.ResourceProperties,
         stackName = p.StackName || errorExit('StackName missing'),
         instanceId = p.InstanceId || errorExit('InstanceId missing'),
         region = p.Region || errorExit('Region missing'),
@@ -21,28 +21,28 @@ exports.handler = function (event, context) {
         res = {},
         tagPrefix = 'cfn:';
 
-    if (event.RequestType == "Delete") {
+    if (e.RequestType == "Delete") {
         var params = {
             Filters: [
                 {Name: 'tag:' + tagPrefix + 'stack-name', Values: [stackName]},
-                {Name: 'tag:' + tagPrefix + 'stack-id', Values: [event.StackId]},
-                {Name: 'tag:' + tagPrefix + 'logical-id', Values: [event.LogicalResourceId]}
+                {Name: 'tag:' + tagPrefix + 'stack-id', Values: [e.StackId]},
+                {Name: 'tag:' + tagPrefix + 'logical-id', Values: [e.LogicalResourceId]}
             ]
         };
         ec2.describeImages(params, function (err, data) {
             if (err) {
-                errorExit("describeImages failed " + err, event, context);
+                errorExit("describeImages failed " + err, e, ctx);
             } else if (data.Images.length === 0) {
-                r.send(event, context, r.SUCCESS, {Info: "Nothing to delete"});
+                r.send(e, ctx, r.SUCCESS, {Info: "Nothing to delete"});
             } else {
                 var imageId = data.Images[0].ImageId;
                 // console.log("DELETING:", data.Images[0]);
                 ec2.deregisterImage({ImageId: imageId}, function (err, data) {
                     if (err) {
-                        errorExit("deregisterImage failed " + err, event, context);
+                        errorExit("deregisterImage failed " + err, e, ctx);
                     } else {
                         res.ImageId = imageId;
-                        r.send(event, context, r.SUCCESS);
+                        r.send(e, ctx, r.SUCCESS);
                     }
                 });
             }
@@ -57,26 +57,25 @@ exports.handler = function (event, context) {
             NoReboot: true
         }, function (err, data) {
             if (err) {
-                errorExit("createImage failed " + err, event, context);
+                errorExit("createImage failed " + err, e, ctx);
             } else {
                 var imageId = data.ImageId;
                 // console.log('SUCCESS: ', "ImageId - " + imageId);
 
                 var params = {
                     Resources: [imageId],
-                    Tags: [
+                    Tags: tags.concat([
                         {Key: tagPrefix + 'stack-name', Value: stackName},
-                        {Key: tagPrefix + 'stack-id', Value: event.StackId},
-                        {Key: tagPrefix + 'logical-id', Value: event.LogicalResourceId}
-                    ]
+                        {Key: tagPrefix + 'stack-id', Value: e.StackId},
+                        {Key: tagPrefix + 'logical-id', Value: e.LogicalResourceId}
+                    ])
                 };
-                params.Tags.concat(tags);
                 ec2.createTags(params, function (err, data) {
                     if (err) {
-                        errorExit("createTags failed " + err, event, context);
+                        errorExit("createTags failed " + err, e, ctx);
                     } else {
                         res.ImageId = imageId;
-                        r.send(event, context, r.SUCCESS, res);
+                        r.send(e, ctx, r.SUCCESS, res);
                     }
                 });
             }
