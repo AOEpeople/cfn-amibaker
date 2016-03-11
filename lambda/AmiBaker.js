@@ -10,6 +10,11 @@ var r = require('cfn-response');
 exports.handler = function (e, ctx) {
 
     console.log("REQUEST RECEIVED:\n", JSON.stringify(e));
+
+    if (e.RequestType == "Delete" && !e.ResourceProperties.InstanceId) {
+        r.send(e, ctx, r.SUCCESS, {Info: "Nothing to delete"});
+    }
+
     var p = e.ResourceProperties,
         stackName = p.StackName || errorExit('StackName missing'),
         instanceId = p.InstanceId || errorExit('InstanceId missing'),
