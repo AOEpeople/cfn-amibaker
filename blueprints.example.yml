@@ -1,4 +1,4 @@
-stacks:
+blueprints:
 
   # Lambda function
   - stackname: amibaker-stack
