@@ -2,7 +2,7 @@
     "name": "aoepeople/cfn-amibaker",
     "description": "Bake AWS AMI via CloudFormation and Lambda",
     "license": "OSL-3.0",
-    "type": "stackformation-stack",
+    "type": "stackformation-blueprint",
     "authors": [
         {
             "name": "Fabrizio Branca",
