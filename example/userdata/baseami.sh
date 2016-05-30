@@ -3,8 +3,11 @@
 # This indicates the the complete process is done and is handled in a trap function
 WAIT_CONDITION_HANDLE='{Ref:BakingCompleteHandle}'
 
-function error_exit { /usr/local/bin/cfn-signal --exit-code 1 --reason "$1" "${WAIT_CONDITION_HANDLE}"; exit 1; }
-
+function error_exit {
+    echo ">>> ERROR_EXIT: $1. Signaling error to wait condition..."
+    /usr/bin/cfn-signal --exit-code 1 --reason "$1" "${WAIT_CONDITION_HANDLE}";
+    exit 1;
+}
 function done_exit {
     rv=$?
     if [ "$rv" == "0" ] ; then
